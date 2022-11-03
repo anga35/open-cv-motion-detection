@@ -2,9 +2,13 @@ import cv2 as cv
 import numpy as np
 import threading
 import time
+import random
+
 
 end=False
 count=True
+sendable=True
+snaps=0
 class CountDownThread(threading.Thread):
     
     def __init__(self) -> None:
@@ -19,6 +23,9 @@ class CountDownThread(threading.Thread):
             time.sleep(1)
             print(count)
             count+=1
+            if(count%200==0):
+                sendable=True
+
         print('Thread exit')
 
 video_capture=cv.VideoCapture(0)
@@ -28,6 +35,7 @@ count_down_thread=CountDownThread()
 count_down_thread.start()
 
 while (True):
+
     isTrue,frame=video_capture.read()
     
     gray=cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
@@ -50,6 +58,17 @@ while (True):
             continue
         (x,y,w,h)=cv.boundingRect(contour)
         cv.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),3)
+        if(sendable):
+            if(snaps<300):
+                if(snaps%100==0):
+                    capture_no=random.randint(0,5000)
+                    cv.imwrite(f'captured_{capture_no}.png',frame)
+                snaps+=1
+                print(snaps)
+            else:
+                sendable=False
+                snaps=0
+                
 
     cv.imshow('Frame',frame)
 
