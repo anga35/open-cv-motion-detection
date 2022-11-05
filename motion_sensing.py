@@ -3,12 +3,14 @@ import numpy as np
 import threading
 import time
 import random
+import requests
 
 
 end=False
 count=True
 sendable=True
 snaps=0
+url='http://127.0.0.1:8000/api/capture-frame/'
 class CountDownThread(threading.Thread):
     
     def __init__(self) -> None:
@@ -62,7 +64,13 @@ while (True):
             if(snaps<300):
                 if(snaps%100==0):
                     capture_no=random.randint(0,5000)
-                    cv.imwrite(f'captured_{capture_no}.png',frame)
+                    capture_name=f'captured_{capture_no}.png'
+                    cv.imwrite(capture_name,frame)
+                    image=open(capture_name,'rb')
+                    print(image)
+                    file={'captured_frame':image}
+                    requests.post(url=url,files=file)
+
                 snaps+=1
                 print(snaps)
             else:
