@@ -4,6 +4,10 @@ import threading
 import time
 import random
 import requests
+from playsound import playsound
+
+
+
 
 
 end=False
@@ -11,8 +15,14 @@ count=True
 sendable=True
 snaps=0
 url='http://127.0.0.1:8000/api/capture-frame/'
+is_alert_playing=False
+def alert():
+    print(f'DUDE {threading.current_thread().name}')
+    global is_alert_playing
+    is_alert_playing=True
+    playsound("C:/Users/Dayod/Downloads/395400__wolfercz__siren.wav")
+    is_alert_playing=False
 class CountDownThread(threading.Thread):
-    
     def __init__(self) -> None:
         threading.Thread.__init__(self)
 
@@ -58,6 +68,10 @@ while (True):
     for contour in contours:
         if(cv.contourArea(contour)<1000):
             continue
+        if(not is_alert_playing):
+            print('inside')
+            alert_thread=threading.Thread(target=alert)
+            alert_thread.start()
         (x,y,w,h)=cv.boundingRect(contour)
         cv.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),3)
         if(sendable):
@@ -69,7 +83,7 @@ while (True):
                     image=open(capture_name,'rb')
                     print(image)
                     file={'captured_frame':image}
-                    requests.post(url=url,files=file)
+                    # requests.post(url=url,files=file)
 
                 snaps+=1
                 print(snaps)
@@ -80,7 +94,7 @@ while (True):
 
     cv.imshow('Frame',frame)
 
-    key=cv.waitKey(20)
+    key=cv.waitKey(5)
     if(key==ord('d')):
         end=True
         break
